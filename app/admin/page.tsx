@@ -213,9 +213,9 @@ function AdminPanel() {
             <header className="app-header">
                 <h2 className="app-title">Admin Panel</h2>
                 <div className="admin-header-links">
-                    <Link href="/" className="admin-back-link">Library</Link>
+                    <Link href="/library" className="admin-back-link">Library</Link>
                     <span className="link-divider">/</span>
-                    <Link href="/live" className="admin-back-link">Live Session</Link>
+                    <Link href="/" className="admin-back-link">Live Session</Link>
                 </div>
             </header>
 

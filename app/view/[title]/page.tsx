@@ -30,7 +30,7 @@ export default async function SongViewPage({
         <main className="page">
             {/* Header */}
             <header className="app-header">
-                <Link href="/" className="admin-back-link">
+                <Link href="/library" className="admin-back-link">
                     ← Back to library
                 </Link>
                 <h2 className="app-title">Lyrics</h2>
