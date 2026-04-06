@@ -1,0 +1,1309 @@
+/* ─── Design Tokens ─────────────────────────────── */
+
+:root {
+    --bg-base: #0a0a0a;
+    --bg-elevated: #141414;
+    --bg-card: #1a1a1a;
+    --bg-highlight: #242424;
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.35);
+    --accent: #c4b5fd;
+    --border: rgba(255, 255, 255, 0.06);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Page Layout ───────────────────────────────── */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    padding: 0.75rem;
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    gap: 0.75rem;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
+    /* Prevent body scroll, use container scroll */
+}
+
+/* ─── App Header ────────────────────────────────── */
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem;
+}
+
+.app-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
+.admin-back-link {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.admin-back-link:hover {
+    color: var(--text-secondary);
+}
+
+/* ─── Admin Cards ───────────────────────────────── */
+
+.admin-card {
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.admin-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.admin-card-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.minimize-toggle {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.625rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.minimize-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.admin-status-node {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(196, 181, 253, 0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+}
+
+.admin-now-playing-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.admin-empty {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    padding: 0.25rem 0;
+}
+
+/* ─── Admin Form ────────────────────────────────── */
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.admin-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: var(--bg-base);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.admin-input::placeholder {
+    color: var(--text-muted);
+}
+
+.admin-input:focus {
+    border-color: rgba(196, 181, 253, 0.4);
+}
+
+.admin-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ─── Buttons ───────────────────────────────────── */
+
+.btn-primary {
+    align-self: flex-start;
+    padding: 0.5rem 1.25rem;
+    background: var(--accent);
+    color: var(--bg-base);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+    filter: none;
+}
+
+.btn-secondary {
+    align-self: flex-start;
+    padding: 0.5rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary:active {
+    transform: scale(0.97);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── Admin Remove Button ───────────────────────── */
+
+.admin-remove-btn {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    flex-shrink: 0;
+}
+
+.admin-remove-btn:hover {
+    color: #f87171;
+    opacity: 1;
+}
+
+/* ─── Admin Warning ─────────────────────────────── */
+
+.admin-warning {
+    font-size: 0.8125rem;
+    color: #f87171;
+    padding: 0.25rem 0;
+}
+
+/* ─── Login Card ────────────────────────────────── */
+
+.login-card {
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+    margin-bottom: auto;
+    max-width: 360px;
+    width: 100%;
+    align-self: center;
+}
+
+.login-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.login-subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin: 0 0 0.25rem 0;
+}
+
+.login-btn {
+    align-self: stretch;
+    text-align: center;
+}
+
+.admin-now-playing-lyrics {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Admin Row Actions ─────────────────────────── */
+
+.admin-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.queue-row:hover .admin-row-actions {
+    opacity: 1;
+}
+
+.admin-action-btn {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.375rem;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    line-height: 1;
+}
+
+.admin-action-btn:hover {
+    color: var(--text-secondary);
+    background: var(--bg-highlight);
+}
+
+.admin-action-btn:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+/* ─── Song Library ──────────────────────────────── */
+
+.library-row {
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.library-row:hover {
+    opacity: 1;
+}
+
+.admin-add-btn {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: none;
+    border: 1px solid rgba(196, 181, 253, 0.2);
+    cursor: pointer;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.admin-add-btn:hover {
+    background: rgba(196, 181, 253, 0.1);
+    border-color: rgba(196, 181, 253, 0.35);
+}
+
+.admin-add-btn:active {
+    transform: scale(0.95);
+}
+
+/* ─── Peek Next Song ────────────────────────────── */
+
+.peek-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-highlight);
+    color: var(--text-muted);
+    font-size: 0.625rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.peek-btn:hover {
+    color: var(--text-secondary);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.peek-btn-active {
+    transform: rotate(180deg);
+    color: var(--accent);
+    border-color: rgba(196, 181, 253, 0.25);
+}
+
+.peek-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 0.875rem 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    animation: peekSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.peek-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.peek-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.peek-lyrics {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    margin-top: 0.125rem;
+}
+
+@keyframes peekSlide {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 200px;
+        padding-top: 0.875rem;
+        padding-bottom: 0.875rem;
+    }
+}
+
+/* ─── Next Song Card (Lyrics Page) ──────────────── */
+
+.next-song-card {
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    overflow: hidden;
+}
+
+.next-song-card:hover {
+    background: var(--bg-card);
+}
+
+.next-song-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.next-song-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.next-song-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.peek-chevron {
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+    padding-right: 0.25rem;
+}
+
+.peek-chevron-open {
+    transform: rotate(180deg);
+    color: var(--accent);
+}
+
+.next-song-lyrics {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+    margin-top: 0;
+    animation: peekSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.peek-lyrics-line {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ─── Now Playing Wrapper ───────────────────────── */
+
+.now-playing-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    min-height: 0;
+}
+
+/* ─── Now Playing Bar ───────────────────────────── */
+
+.now-playing-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.125rem;
+    background: var(--bg-elevated);
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+}
+
+.album-art {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2a2040 0%, #1a1230 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.album-art-icon {
+    font-size: 1.25rem;
+    color: var(--accent);
+    opacity: 0.8;
+}
+
+.now-playing-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.now-playing-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 0.125rem;
+}
+
+.now-playing-title {
+    font-size: 1.125rem;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Equalizer ─────────────────────────────────── */
+
+.equalizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 20px;
+    padding-right: 0.25rem;
+}
+
+.eq-bar {
+    width: 3px;
+    border-radius: 1.5px;
+    background: var(--accent);
+    opacity: 0.7;
+}
+
+.eq-bar:nth-child(1) {
+    animation: eqBounce 0.45s ease-in-out infinite alternate;
+    height: 8px;
+}
+
+.eq-bar:nth-child(2) {
+    animation: eqBounce 0.55s ease-in-out infinite alternate;
+    animation-delay: 0.1s;
+    height: 16px;
+}
+
+.eq-bar:nth-child(3) {
+    animation: eqBounce 0.4s ease-in-out infinite alternate;
+    animation-delay: 0.2s;
+    height: 12px;
+}
+
+.eq-bar:nth-child(4) {
+    animation: eqBounce 0.5s ease-in-out infinite alternate;
+    animation-delay: 0.05s;
+    height: 6px;
+}
+
+@keyframes eqBounce {
+    from {
+        transform: scaleY(0.3);
+    }
+
+    to {
+        transform: scaleY(1);
+    }
+}
+
+/* ─── Lyrics ────────────────────────────────────── */
+
+.lyrics-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2rem;
+    position: relative;
+}
+
+.lyrics-container.poll-active-layout {
+    display: none;
+    /* Removed as flexbox handles this now */
+}
+
+.lyrics-container::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    height: 56px;
+    background: linear-gradient(to top, var(--bg-elevated) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.lyrics-inner {
+    padding: 0.5rem 0.875rem 2rem;
+}
+
+.lyrics-line {
+    font-size: 1.375rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.lyrics-line:hover {
+    color: var(--text-primary);
+}
+
+.lyrics-break {
+    height: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .lyrics-line {
+        font-size: 1.5rem;
+    }
+}
+
+/* ─── Empty State ───────────────────────────────── */
+
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: transparent;
+    border: none;
+    padding: 2rem 1rem;
+}
+
+.empty-album {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2a2040 0%, #1a1230 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+}
+
+.empty-icon {
+    font-size: 2rem;
+    color: var(--accent);
+    opacity: 0.5;
+}
+
+.empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empty-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* ─── Queue Card ────────────────────────────────── */
+
+.queue-card {
+    background: var(--bg-elevated);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 1rem;
+}
+
+.queue-heading {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.625rem;
+    padding-left: 0.125rem;
+}
+
+.queue-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.queue-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.375rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.queue-row:hover {
+    background: var(--bg-highlight);
+}
+
+.queue-index {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.queue-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #2a2040 0%, #1a1230 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    color: var(--accent);
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.queue-name {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ─── Animations ────────────────────────────────── */
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─── Home Page Styles ──────────────────────────── */
+
+.live-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(196, 181, 253, 0.1);
+    color: var(--accent);
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid rgba(196, 181, 253, 0.15);
+    transition: all 0.2s ease;
+}
+
+.live-link:hover {
+    background: rgba(196, 181, 253, 0.15);
+    border-color: rgba(196, 181, 253, 0.25);
+    transform: translateY(-1px);
+}
+
+.live-link:active {
+    transform: translateY(0);
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    background: #f87171;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.hero-section {
+    padding: 1.5rem 0.25rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.hero-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    background: var(--bg-elevated);
+    padding: 0.875rem 1.125rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: rgba(196, 181, 253, 0.4);
+}
+
+.song-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 2rem;
+}
+
+.now-playing-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    margin-top: 0.5rem;
+}
+
+.song-item-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.song-item-card:hover {
+    background: var(--bg-highlight);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(4px);
+}
+
+.song-item-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2a2040 0%, #1a1230 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--accent);
+    opacity: 0.8;
+    flex-shrink: 0;
+}
+
+.song-item-info {
+    flex: 1;
+}
+
+.song-item-title {
+    font-size: 1rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.song-item-subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+}
+
+.song-item-arrow {
+    color: var(--text-muted);
+    font-size: 1rem;
+    padding-right: 0.25rem;
+    opacity: 0;
+    transition: all 0.2s ease;
+}
+
+.song-item-card:hover .song-item-arrow {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+.empty-state-mini {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+}
+
+.home-footer {
+    margin-top: auto;
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.admin-footer-link {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.admin-footer-link:hover {
+    opacity: 1;
+}
+
+/* ─── Navigation & Utils ────────────────────────── */
+
+.admin-header-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.link-divider {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.3;
+}
+
+/* ─── Static View Specifics ─────────────────────── */
+
+.static-view-bar {
+    border-bottom: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+}
+
+.static-lyrics {
+    border-top: none;
+}
+
+/* ─── Poll System ────────────────────────────────── */
+
+.poll-card-live {
+    margin: 1.5rem 0;
+    border: 1px solid var(--accent);
+    background: rgba(196, 181, 253, 0.05);
+}
+
+.poll-options-live {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.live-session-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.next-song-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.poll-option {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+    background: var(--bg-elevated);
+}
+
+.poll-option:hover:not(.disabled) {
+    border-color: rgba(196, 181, 253, 0.4);
+    background: var(--bg-highlight);
+}
+
+.poll-option.voted {
+    border-color: var(--accent);
+    background: rgba(196, 181, 253, 0.08);
+}
+
+.poll-option.disabled {
+    cursor: default;
+}
+
+.poll-option-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.poll-option-title {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.poll-option-percentage {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.poll-bar-track {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 1;
+}
+
+.poll-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.3;
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.poll-bar-fill.winner,
+.poll-bar-winner {
+    opacity: 0.8 !important;
+    background: #34d399 !important;
+    /* Green for winner */
+}
+
+.poll-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* ─── Poll Overlay (Popup) ───────────────────────── */
+
+.poll-overlay-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.poll-overlay-content {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-card);
+    border: 1px solid var(--accent);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.poll-close-btn {
+    width: 100%;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+}
+
+/* ─── Bottom Poll Card ───────────────────────────── */
+
+.bottom-poll-card {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(196, 181, 253, 0.03);
+    padding: 0.875rem 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.bottom-poll-card.poll-card-live {
+    margin: 0;
+}
+
+/* Admin Poll Results */
+.poll-results {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.poll-result-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.poll-result-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.poll-result-title {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.poll-result-count {
+    font-size: 0.8125rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.poll-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+/* Admin Poll Selection */
+.poll-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: white;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.poll-checkbox-on {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.poll-selected {
+    background: rgba(196, 181, 253, 0.08) !important;
+    border-color: var(--accent) !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.show-poll-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(196, 181, 253, 0.05);
+    border: 1px dashed var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.show-poll-btn:hover {
+    background: rgba(196, 181, 253, 0.1);
+    border-style: solid;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
