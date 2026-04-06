@@ -44,6 +44,16 @@ body {
     /* Prevent body scroll, use container scroll */
 }
 
+.admin-scroll-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 2rem;
+    -webkit-overflow-scrolling: touch;
+}
+
 /* ─── App Header ────────────────────────────────── */
 
 .app-header {

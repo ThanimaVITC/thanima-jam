@@ -88,10 +88,12 @@ export default function LyricsPage() {
     await runTransaction(pollRef, (currentPoll) => {
       if (currentPoll && currentPoll.active) {
         if (!currentPoll.counts) {
-          currentPoll.counts = new Array(currentPoll.options.length).fill(0);
+          currentPoll.counts = new Array((currentPoll.options || []).length).fill(0);
         }
-        currentPoll.counts[index]++;
-        currentPoll.totalVotes = (currentPoll.totalVotes || 0) + 1;
+        if (currentPoll.counts && typeof index === 'number') {
+          currentPoll.counts[index] = (currentPoll.counts[index] || 0) + 1;
+          currentPoll.totalVotes = (currentPoll.totalVotes || 0) + 1;
+        }
       }
       return currentPoll;
     });
@@ -136,7 +138,7 @@ export default function LyricsPage() {
             {/* Lyrics portion */}
             <div ref={lyricsRef} className="lyrics-container">
               <div className="lyrics-inner">
-                {currentSong.lyrics.split("\n").map((line: string, i: number) => (
+                {currentSong.lyrics?.split("\n").map((line: string, i: number) => (
                   <p key={i} className={`lyrics-line ${line.trim() === "" ? "lyrics-break" : ""}`}>
                     {line || "\u00A0"}
                   </p>
@@ -163,7 +165,7 @@ export default function LyricsPage() {
               {userVote !== null ? "Vote Cast!" : "New Poll: Pick the next song"}
             </span>
             <div className="poll-options-live">
-              {pollData.options.map((option: string, i: number) => (
+              {pollData.options?.map((option: string, i: number) => (
                 <div
                   key={i}
                   className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
@@ -171,13 +173,13 @@ export default function LyricsPage() {
                 >
                   <div className="poll-option-content">
                     <span className="poll-option-title">{option}</span>
-                    {showResults && <span className="poll-option-percentage">{Math.round((pollData.counts[i] / (pollData.totalVotes || 1)) * 100)}%</span>}
+                    {showResults && <span className="poll-option-percentage">{Math.round(((pollData.counts?.[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
                   </div>
                   {showResults && (
                     <div className="poll-bar-track">
                       <div
-                        className={`poll-bar-fill ${!pollData.active && pollData.counts[i] === Math.max(...pollData.counts) ? "winner" : ""}`}
-                        style={{ width: `${(pollData.counts[i] / maxVote) * 100}%` }}
+                        className={`poll-bar-fill ${!pollData.active && pollData.counts?.[i] === Math.max(...(pollData.counts || [0])) ? "winner" : ""}`}
+                        style={{ width: `${((pollData.counts?.[i] || 0) / maxVote) * 100}%` }}
                       />
                     </div>
                   )}
@@ -216,7 +218,7 @@ export default function LyricsPage() {
           </div>
           {peekOpen && nextSong && (
             <div className="next-song-lyrics">
-              {nextSong.lyrics.split("\n").map((line: string, i: number) => (
+              {nextSong.lyrics?.split("\n").map((line: string, i: number) => (
                 <p key={i} className={`peek-lyrics-line ${line.trim() === "" ? "lyrics-break" : ""}`}>
                   {line || "\u00A0"}
                 </p>
@@ -248,7 +250,7 @@ export default function LyricsPage() {
                 </button>
               </div>
               <div className="poll-options-live">
-                {pollData.options.map((option: string, i: number) => (
+                {pollData.options?.map((option: string, i: number) => (
                   <div
                     key={i}
                     className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
@@ -256,13 +258,13 @@ export default function LyricsPage() {
                   >
                     <div className="poll-option-content">
                       <span className="poll-option-title">{option}</span>
-                      {showResults && <span className="poll-option-percentage">{Math.round((pollData.counts[i] / (pollData.totalVotes || 1)) * 100)}%</span>}
+                      {showResults && <span className="poll-option-percentage">{Math.round(((pollData.counts?.[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
                     </div>
                     {showResults && (
                       <div className="poll-bar-track">
                         <div
-                          className={`poll-bar-fill ${!pollData.active && pollData.counts[i] === Math.max(...pollData.counts) ? "winner" : ""}`}
-                          style={{ width: `${(pollData.counts[i] / maxVote) * 100}%` }}
+                          className={`poll-bar-fill ${!pollData.active && pollData.counts?.[i] === Math.max(...(pollData.counts || [0])) ? "winner" : ""}`}
+                          style={{ width: `${((pollData.counts?.[i] || 0) / maxVote) * 100}%` }}
                         />
                       </div>
                     )}

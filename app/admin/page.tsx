@@ -138,7 +138,7 @@ function AdminPanel() {
     }
 
     async function handleMoveDown(index: number) {
-        if (index >= localQueue.length - 1) return;
+        if (!localQueue || index >= localQueue.length - 1) return;
         const q = [...localQueue];
         [q[index], q[index + 1]] = [q[index + 1], q[index]];
         await updateState({ queue: q });
@@ -205,154 +205,156 @@ function AdminPanel() {
                 </div>
             </header>
 
-            {/* Now Playing */}
-            <div className="admin-card">
-                <div className="admin-card-header">
-                    <span className="admin-card-label">Now Playing</span>
-                    {currentSong && <span className="admin-status-node">Live</span>}
-                </div>
-                <p className="admin-now-playing-title">
-                    {currentSong?.title || "Nothing playing"}
-                </p>
-                {currentSong?.lyrics ? (
-                    <p className="admin-now-playing-lyrics">
-                        {currentSong.lyrics.split("\n")[0]}…
+            <div className="admin-scroll-container">
+                {/* Now Playing */}
+                <div className="admin-card">
+                    <div className="admin-card-header">
+                        <span className="admin-card-label">Now Playing</span>
+                        {currentSong && <span className="admin-status-node">Live</span>}
+                    </div>
+                    <p className="admin-now-playing-title">
+                        {currentSong?.title || "Nothing playing"}
                     </p>
-                ) : (
-                    <p className="admin-empty">Queue up a song to start the session.</p>
-                )}
-                <button
-                    onClick={handleNextSong}
-                    className="btn-primary"
-                    style={{ width: "100%", marginTop: "1rem" }}
-                >
-                    {localQueue.length > 0 ? "Next Song →" : "Clear & End Session"}
-                </button>
-            </div>
-
-            {/* Poll Management */}
-            <div className="admin-card">
-                <div className="admin-card-header" onClick={() => setIsPollMinimized(!isPollMinimized)} style={{ cursor: "pointer" }}>
-                    <span className="admin-card-label">
-                        {pollData ? `Poll ${pollData.active ? "(Live)" : "(Ended)"}` : "Create Poll"}
-                    </span>
-                    <button className="minimize-toggle">
-                        {isPollMinimized ? "Expand +" : "Minimize −"}
+                    {currentSong?.lyrics ? (
+                        <p className="admin-now-playing-lyrics">
+                            {currentSong.lyrics.split("\n")[0]}…
+                        </p>
+                    ) : (
+                        <p className="admin-empty">Queue up a song to start the session.</p>
+                    )}
+                    <button
+                        onClick={handleNextSong}
+                        className="btn-primary"
+                        style={{ width: "100%", marginTop: "1rem" }}
+                    >
+                        {localQueue.length > 0 ? "Next Song →" : "Clear & End Session"}
                     </button>
                 </div>
 
-                {!isPollMinimized && (
-                    <div className="admin-card-content">
-                        {pollData ? (
-                            <>
-                                <div className="poll-results">
-                                    {pollData.options.map((title: string, i: number) => (
-                                        <div key={i} className="poll-result-row">
-                                            <div className="poll-result-info">
-                                                <span className="poll-result-title">{title}</span>
-                                                <span className="poll-result-count">{pollData.counts[i]}</span>
-                                            </div>
-                                            <div className="poll-bar-track">
-                                                <div
-                                                    className={`poll-bar-fill ${!pollData.active && pollData.counts[i] === Math.max(...pollData.counts) ? "poll-bar-winner" : ""}`}
-                                                    style={{ width: `${(pollData.counts[i] / maxVote) * 100}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <p className="admin-empty" style={{ fontSize: "0.75rem" }}>
-                                    {pollData.totalVotes} vote{pollData.totalVotes !== 1 ? "s" : ""} total
-                                </p>
-                                <div className="poll-actions">
-                                    {pollData.active ? (
-                                        <button onClick={handleEndPoll} className="btn-primary">
-                                            End Poll & Add Winner
-                                        </button>
-                                    ) : (
-                                        <button onClick={handleClearPoll} className="btn-secondary">
-                                            Clear Poll
-                                        </button>
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className="admin-empty">
-                                    Select 2–4 songs, then create poll ({pollSelections.length}/4 selected)
-                                </p>
-                                <ul className="queue-list" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                                    {allSongs.map((song: Song) => {
-                                        const selected = pollSelections.includes(song.title);
-                                        return (
-                                            <li
-                                                key={song.title}
-                                                className={`queue-row library-row ${selected ? "poll-selected" : ""}`}
-                                                onClick={() => togglePollSelection(song.title)}
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                <div className={`poll-checkbox ${selected ? "poll-checkbox-on" : ""}`}>
-                                                    {selected ? "✓" : ""}
+                {/* Poll Management */}
+                <div className="admin-card">
+                    <div className="admin-card-header" onClick={() => setIsPollMinimized(!isPollMinimized)} style={{ cursor: "pointer" }}>
+                        <span className="admin-card-label">
+                            {pollData ? `Poll ${pollData.active ? "(Live)" : "(Ended)"}` : "Create Poll"}
+                        </span>
+                        <button className="minimize-toggle">
+                            {isPollMinimized ? "Expand +" : "Minimize −"}
+                        </button>
+                    </div>
+
+                    {!isPollMinimized && (
+                        <div className="admin-card-content">
+                            {pollData ? (
+                                <>
+                                    <div className="poll-results">
+                                        {pollData.options?.map((title: string, i: number) => (
+                                            <div key={i} className="poll-result-row">
+                                                <div className="poll-result-info">
+                                                    <span className="poll-result-title">{title}</span>
+                                                    <span className="poll-result-count">{pollData.counts?.[i] || 0}</span>
                                                 </div>
-                                                <span className="queue-name">{song.title}</span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                                <button
-                                    onClick={handleCreatePoll}
-                                    disabled={pollSelections.length < 2}
-                                    className="btn-primary"
-                                    style={{ width: "100%", marginTop: "1rem" }}
-                                >
-                                    Create Poll
-                                </button>
-                            </>
-                        )}
+                                                <div className="poll-bar-track">
+                                                    <div
+                                                        className={`poll-bar-fill ${!pollData.active && pollData.counts?.[i] === Math.max(...(pollData.counts || [0])) ? "poll-bar-winner" : ""}`}
+                                                        style={{ width: `${((pollData.counts?.[i] || 0) / maxVote) * 100}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="admin-empty" style={{ fontSize: "0.75rem" }}>
+                                        {pollData.totalVotes} vote{pollData.totalVotes !== 1 ? "s" : ""} total
+                                    </p>
+                                    <div className="poll-actions">
+                                        {pollData.active ? (
+                                            <button onClick={handleEndPoll} className="btn-primary">
+                                                End Poll & Add Winner
+                                            </button>
+                                        ) : (
+                                            <button onClick={handleClearPoll} className="btn-secondary">
+                                                Clear Poll
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="admin-empty">
+                                        Select 2–4 songs, then create poll ({pollSelections.length}/4 selected)
+                                    </p>
+                                    <ul className="queue-list" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                                        {allSongs.map((song: Song) => {
+                                            const selected = pollSelections.includes(song.title);
+                                            return (
+                                                <li
+                                                    key={song.title}
+                                                    className={`queue-row library-row ${selected ? "poll-selected" : ""}`}
+                                                    onClick={() => togglePollSelection(song.title)}
+                                                    style={{ cursor: "pointer" }}
+                                                >
+                                                    <div className={`poll-checkbox ${selected ? "poll-checkbox-on" : ""}`}>
+                                                        {selected ? "✓" : ""}
+                                                    </div>
+                                                    <span className="queue-name">{song.title}</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                    <button
+                                        onClick={handleCreatePoll}
+                                        disabled={pollSelections.length < 2}
+                                        className="btn-primary"
+                                        style={{ width: "100%", marginTop: "1rem" }}
+                                    >
+                                        Create Poll
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Queue */}
+                <div className="admin-card">
+                    <span className="admin-card-label">Queue ({localQueue.length})</span>
+                    {localQueue.length === 0 ? (
+                        <p className="admin-empty">No songs in queue</p>
+                    ) : (
+                        <ul className="queue-list">
+                            {localQueue.map((song: Song, i: number) => (
+                                <li key={`${song.title}-${i}`} className="queue-row">
+                                    <span className="queue-index">{i + 1}</span>
+                                    <div className="queue-thumb">♪</div>
+                                    <span className="queue-name">{song.title}</span>
+                                    <div className="admin-row-actions">
+                                        <button onClick={() => handleMoveUp(i)} disabled={i === 0} className="admin-action-btn" title="Move up">↑</button>
+                                        <button onClick={() => handleMoveDown(i)} disabled={i >= localQueue.length - 1} className="admin-action-btn" title="Move down">↓</button>
+                                        <button onClick={() => handleRemoveFromQueue(i)} className="admin-remove-btn">✕</button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                {/* Song Library */}
+                {availableSongs.length > 0 && (
+                    <div className="admin-card">
+                        <span className="admin-card-label">
+                            Song Library ({availableSongs.length} available)
+                        </span>
+                        <ul className="queue-list">
+                            {availableSongs.map((song: Song) => (
+                                <li key={song.title} className="queue-row library-row">
+                                    <div className="queue-thumb">♪</div>
+                                    <span className="queue-name">{song.title}</span>
+                                    <button onClick={() => handleAddToQueue(song)} className="admin-add-btn">+ Add</button>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 )}
             </div>
-
-            {/* Queue */}
-            <div className="admin-card">
-                <span className="admin-card-label">Queue ({localQueue.length})</span>
-                {localQueue.length === 0 ? (
-                    <p className="admin-empty">No songs in queue</p>
-                ) : (
-                    <ul className="queue-list">
-                        {localQueue.map((song: Song, i: number) => (
-                            <li key={`${song.title}-${i}`} className="queue-row">
-                                <span className="queue-index">{i + 1}</span>
-                                <div className="queue-thumb">♪</div>
-                                <span className="queue-name">{song.title}</span>
-                                <div className="admin-row-actions">
-                                    <button onClick={() => handleMoveUp(i)} disabled={i === 0} className="admin-action-btn" title="Move up">↑</button>
-                                    <button onClick={() => handleMoveDown(i)} disabled={i >= localQueue.length - 1} className="admin-action-btn" title="Move down">↓</button>
-                                    <button onClick={() => handleRemoveFromQueue(i)} className="admin-remove-btn">✕</button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            {/* Song Library */}
-            {availableSongs.length > 0 && (
-                <div className="admin-card">
-                    <span className="admin-card-label">
-                        Song Library ({availableSongs.length} available)
-                    </span>
-                    <ul className="queue-list">
-                        {availableSongs.map((song: Song) => (
-                            <li key={song.title} className="queue-row library-row">
-                                <div className="queue-thumb">♪</div>
-                                <span className="queue-name">{song.title}</span>
-                                <button onClick={() => handleAddToQueue(song)} className="admin-add-btn">+ Add</button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </main>
     );
 }
