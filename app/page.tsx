@@ -31,36 +31,38 @@ export default function HomePage() {
                 </Link>
             </header>
 
-            {/* Hero / Search */}
-            <div className="hero-section">
-                <h2 className="hero-title">Song Library</h2>
-                <div className="search-wrapper">
-                    <input
-                        type="text"
-                        placeholder="Search songs..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="search-input"
-                    />
+            <div className="admin-scroll-container">
+                {/* Hero / Search */}
+                <div className="hero-section">
+                    <h2 className="hero-title">Song Library</h2>
+                    <div className="search-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Search songs..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="search-input"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Song List */}
-            <div className="song-grid">
-                {filteredSongs.map((song, i) => (
-                    <Link
-                        key={i}
-                        href={`/view/${encodeURIComponent(song.title)}`}
-                        className="song-item-card"
-                    >
-                        <div className="song-item-thumb">♪</div>
-                        <div className="song-item-info">
-                            <p className="song-item-title">{song.title}</p>
-                            <p className="song-item-subtitle">View lyrics</p>
-                        </div>
-                        <span className="song-item-arrow">→</span>
-                    </Link>
-                ))}
+                {/* Song List */}
+                <div className="song-grid">
+                    {filteredSongs.map((song, i) => (
+                        <Link
+                            key={i}
+                            href={`/view/${encodeURIComponent(song.title)}`}
+                            className="song-item-card"
+                        >
+                            <div className="song-item-thumb">♪</div>
+                            <div className="song-item-info">
+                                <p className="song-item-title">{song.title}</p>
+                                <p className="song-item-subtitle">View lyrics</p>
+                            </div>
+                            <span className="song-item-arrow">→</span>
+                        </Link>
+                    ))}
+                </div>
             </div>
         </main>
     );

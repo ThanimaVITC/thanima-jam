@@ -36,36 +36,38 @@ export default async function SongViewPage({
                 <h2 className="app-title">Lyrics</h2>
             </header>
 
-            {/* Now Playing Bar style for the title */}
-            <div className="now-playing-bar static-view-bar">
-                <div className="album-art">
-                    <div className="album-art-icon">♪</div>
+            <div className="admin-scroll-container">
+                {/* Now Playing Bar style for the title */}
+                <div className="now-playing-bar static-view-bar">
+                    <div className="album-art">
+                        <div className="album-art-icon">♪</div>
+                    </div>
+                    <div className="now-playing-info">
+                        <span className="now-playing-label">Viewing</span>
+                        <h1 className="now-playing-title">{song.title}</h1>
+                    </div>
                 </div>
-                <div className="now-playing-info">
-                    <span className="now-playing-label">Viewing</span>
-                    <h1 className="now-playing-title">{song.title}</h1>
-                </div>
-            </div>
 
-            {/* Lyrics Container */}
-            <div className="lyrics-container static-lyrics">
-                <div className="lyrics-inner">
-                    {song.lyrics.split("\n").map((line, i) => (
-                        <p
-                            key={i}
-                            className={`lyrics-line ${line.trim() === "" ? "lyrics-break" : ""
-                                }`}
-                        >
-                            {line || "\u00A0"}
-                        </p>
-                    ))}
+                {/* Lyrics Container */}
+                <div className="lyrics-container static-lyrics">
+                    <div className="lyrics-inner">
+                        {song.lyrics.split("\n").map((line, i) => (
+                            <p
+                                key={i}
+                                className={`lyrics-line ${line.trim() === "" ? "lyrics-break" : ""
+                                    }`}
+                            >
+                                {line || "\u00A0"}
+                            </p>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Footer hint */}
-            <footer className="home-footer">
-                <p className="empty-subtitle">Enjoy the jam!</p>
-            </footer>
+                {/* Footer hint */}
+                <footer className="home-footer">
+                    <p className="empty-subtitle">Enjoy the jam!</p>
+                </footer>
+            </div>
         </main>
     );
 }
