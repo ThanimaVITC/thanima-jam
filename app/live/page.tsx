@@ -102,7 +102,8 @@ export default function LyricsPage() {
   const { currentSong, queue } = state;
   const nextSong = queue.length > 0 ? queue[0] : null;
   const showResults = userVote !== null || (pollData && !pollData.active);
-  const maxVote = pollData ? Math.max(...pollData.counts, 1) : 1;
+  const countsArray = pollData && Array.isArray(pollData.counts) ? pollData.counts : [0];
+  const maxVote = Math.max(...countsArray, 1);
 
   return (
     <main className="page">

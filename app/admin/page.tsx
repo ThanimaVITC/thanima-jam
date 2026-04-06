@@ -172,9 +172,10 @@ function AdminPanel() {
         if (!pollData || !pollData.active) return;
 
         // Tally results and find winner
-        const maxVotes = Math.max(...pollData.counts);
-        const winnerIdx = pollData.counts.indexOf(maxVotes);
-        const winnerTitle = pollData.options[winnerIdx];
+        const counts = Array.isArray(pollData.counts) ? pollData.counts : [];
+        const maxVotes = counts.length > 0 ? Math.max(...counts) : 0;
+        const winnerIdx = counts.indexOf(maxVotes);
+        const winnerTitle = (pollData.options || [])[winnerIdx];
         const winnerSong = allSongs.find(s => s.title === winnerTitle);
 
         if (winnerSong) {
@@ -192,7 +193,8 @@ function AdminPanel() {
         await set(ref(db, "poll"), null);
     }
 
-    const maxVote = pollData ? Math.max(...pollData.counts, 1) : 1;
+    const countsArray = pollData && Array.isArray(pollData.counts) ? pollData.counts : [0];
+    const maxVote = Math.max(...countsArray, 1);
 
     return (
         <main className="page">
