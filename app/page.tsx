@@ -25,9 +25,9 @@ export default function HomePage() {
             {/* Header */}
             <header className="app-header">
                 <h1 className="app-title">Thanima Jam</h1>
-                <Link href="/live" className="live-link">
+                <Link href="/live" className="live-link-premium">
                     <span className="live-dot"></span>
-                    Live Session
+                    GO TO LIVE SESSION ✨
                 </Link>
             </header>
 
