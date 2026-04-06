@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { socket } from "@/lib/socket";
+import { useEffect, useState, useCallback } from "react";
+import { db } from "@/lib/firebase";
+import { ref, onValue, set, get } from "firebase/database";
 import Link from "next/link";
 import songsData from "@/songs.json";
 
@@ -79,41 +80,32 @@ function AdminPanel() {
     const [pollSelections, setPollSelections] = useState<string[]>([]);
     const [isPollMinimized, setIsPollMinimized] = useState(false);
 
-    const pendingEmit = useRef(false);
-    const [hasMounted, setHasMounted] = useState(false);
-
     useEffect(() => {
-        setHasMounted(true);
-        function onState(newState: { currentSong: Song | null; queue: Song[] }) {
-            setCurrentSong(newState.currentSong);
-            if (!pendingEmit.current) {
-                setLocalQueue(newState.queue);
-            }
-            pendingEmit.current = false;
-        }
-        function onPoll(data: PollData | null) {
-            setPollData(data);
-        }
-        function requestState() {
-            socket.emit("get_state");
-        }
+        const stateRef = ref(db, "state");
+        const pollRef = ref(db, "poll");
 
-        socket.on("state", onState);
-        socket.on("poll", onPoll);
-        socket.on("connect", requestState);
-        if (socket.connected) requestState();
+        const unsubs = [
+            onValue(stateRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    setCurrentSong(data.currentSong || null);
+                    setLocalQueue(data.queue || []);
+                }
+            }),
+            onValue(pollRef, (snapshot) => {
+                const data = snapshot.val();
+                setPollData(data);
+            })
+        ];
 
-        return () => {
-            socket.off("state", onState);
-            socket.off("poll", onPoll);
-            socket.off("connect", requestState);
-        };
+        return () => unsubs.forEach(u => u());
     }, []);
 
-    const emitQueue = useCallback((newQueue: Song[]) => {
-        pendingEmit.current = true;
-        setLocalQueue(newQueue);
-        socket.emit("update_queue", newQueue);
+    const updateState = useCallback(async (updates: Partial<AppState>) => {
+        const stateRef = ref(db, "state");
+        const snapshot = await get(stateRef);
+        const currentState = snapshot.val() || { currentSong: null, queue: [] };
+        await set(stateRef, { ...currentState, ...updates });
     }, []);
 
     const allSongs: Song[] = songsData;
@@ -123,20 +115,33 @@ function AdminPanel() {
         return !inQueue && !isCurrent;
     });
 
-    function handleNextSong() { socket.emit("next_song"); }
-    function handleAddToQueue(song: Song) { emitQueue([...localQueue, song]); }
-    function handleRemoveFromQueue(index: number) { emitQueue(localQueue.filter((_, i) => i !== index)); }
-    function handleMoveUp(index: number) {
+    async function handleNextSong() {
+        const newQueue = [...localQueue];
+        const next = newQueue.shift() || null;
+        await updateState({ currentSong: next, queue: newQueue });
+    }
+
+    async function handleAddToQueue(song: Song) {
+        await updateState({ queue: [...localQueue, song] });
+    }
+
+    async function handleRemoveFromQueue(index: number) {
+        const newQueue = localQueue.filter((_, i) => i !== index);
+        await updateState({ queue: newQueue });
+    }
+
+    async function handleMoveUp(index: number) {
         if (index === 0) return;
         const q = [...localQueue];
         [q[index - 1], q[index]] = [q[index], q[index - 1]];
-        emitQueue(q);
+        await updateState({ queue: q });
     }
-    function handleMoveDown(index: number) {
+
+    async function handleMoveDown(index: number) {
         if (index >= localQueue.length - 1) return;
         const q = [...localQueue];
         [q[index], q[index + 1]] = [q[index + 1], q[index]];
-        emitQueue(q);
+        await updateState({ queue: q });
     }
 
     // Poll helpers
@@ -150,15 +155,42 @@ function AdminPanel() {
         );
     }
 
-    function handleCreatePoll() {
+    async function handleCreatePoll() {
         if (pollSelections.length < 2) return;
-        console.log("[ADMIN] Creating poll with:", pollSelections);
-        socket.emit("create_poll", pollSelections);
+        const options = pollSelections;
+        const pollRef = ref(db, "poll");
+        await set(pollRef, {
+            options,
+            counts: new Array(options.length).fill(0),
+            totalVotes: 0,
+            active: true
+        });
         setPollSelections([]);
     }
 
-    function handleEndPoll() { socket.emit("end_poll"); }
-    function handleClearPoll() { socket.emit("clear_poll"); }
+    async function handleEndPoll() {
+        if (!pollData || !pollData.active) return;
+
+        // Tally results and find winner
+        const maxVotes = Math.max(...pollData.counts);
+        const winnerIdx = pollData.counts.indexOf(maxVotes);
+        const winnerTitle = pollData.options[winnerIdx];
+        const winnerSong = allSongs.find(s => s.title === winnerTitle);
+
+        if (winnerSong) {
+            const alreadyInQueue = localQueue.some(s => s.title === winnerSong.title);
+            if (!alreadyInQueue) {
+                await updateState({ queue: [...localQueue, winnerSong] });
+            }
+        }
+
+        const pollRef = ref(db, "poll");
+        await set(pollRef, { ...pollData, active: false });
+    }
+
+    async function handleClearPoll() {
+        await set(ref(db, "poll"), null);
+    }
 
     const maxVote = pollData ? Math.max(...pollData.counts, 1) : 1;
 
@@ -214,7 +246,7 @@ function AdminPanel() {
                         {pollData ? (
                             <>
                                 <div className="poll-results">
-                                    {pollData.options.map((title, i) => (
+                                    {pollData.options.map((title: string, i: number) => (
                                         <div key={i} className="poll-result-row">
                                             <div className="poll-result-info">
                                                 <span className="poll-result-title">{title}</span>
@@ -250,7 +282,7 @@ function AdminPanel() {
                                     Select 2–4 songs, then create poll ({pollSelections.length}/4 selected)
                                 </p>
                                 <ul className="queue-list" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                                    {allSongs.map((song) => {
+                                    {allSongs.map((song: Song) => {
                                         const selected = pollSelections.includes(song.title);
                                         return (
                                             <li
@@ -288,7 +320,7 @@ function AdminPanel() {
                     <p className="admin-empty">No songs in queue</p>
                 ) : (
                     <ul className="queue-list">
-                        {localQueue.map((song, i) => (
+                        {localQueue.map((song: Song, i: number) => (
                             <li key={`${song.title}-${i}`} className="queue-row">
                                 <span className="queue-index">{i + 1}</span>
                                 <div className="queue-thumb">♪</div>
@@ -311,7 +343,7 @@ function AdminPanel() {
                         Song Library ({availableSongs.length} available)
                     </span>
                     <ul className="queue-list">
-                        {availableSongs.map((song) => (
+                        {availableSongs.map((song: Song) => (
                             <li key={song.title} className="queue-row library-row">
                                 <div className="queue-thumb">♪</div>
                                 <span className="queue-name">{song.title}</span>

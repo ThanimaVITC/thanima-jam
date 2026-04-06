@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { socket } from "@/lib/socket";
+import { db } from "@/lib/firebase";
+import { ref, onValue, runTransaction } from "firebase/database";
 import Link from "next/link";
 
 interface Song {
@@ -35,56 +36,42 @@ export default function LyricsPage() {
   const lyricsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function onState(newState: AppState) {
-      console.log("[PAGE] State received:", newState);
-      setState((prev) => {
-        const songChanged =
-          newState.currentSong?.title !== prev.currentSong?.title;
-        if (songChanged) {
-          setFadeKey((k) => k + 1);
+    const stateRef = ref(db, "state");
+    const pollRef = ref(db, "poll");
+
+    const unsubs = [
+      onValue(stateRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setState((prev) => {
+            const songChanged = data.currentSong?.title !== prev.currentSong?.title;
+            if (songChanged) {
+              setFadeKey((k) => k + 1);
+            }
+            return data;
+          });
         }
-        return newState;
-      });
-    }
+      }),
+      onValue(pollRef, (snapshot) => {
+        const data = snapshot.val();
+        setPollData((prev) => {
+          const isNewPoll = data?.active && (!prev || !prev.active);
+          if (isNewPoll) {
+            setPollPopupOpen(true);
+            setIsPollResultsHidden(false);
+          }
+          return data;
+        });
 
-    function onPoll(data: PollData | null) {
-      setPollData((prev) => {
-        // Trigger popup if a NEW active poll starts
-        const isNewPoll = data?.active && (!prev || !prev.active);
-        if (isNewPoll) {
-          setPollPopupOpen(true);
-          setIsPollResultsHidden(false); // Auto-show results for new polls
+        if (!data) {
+          setUserVote(null);
+          setPollPopupOpen(false);
+          setIsPollResultsHidden(false);
         }
-        return data;
-      });
+      })
+    ];
 
-      // Reset user vote if poll is cleared
-      if (!data) {
-        setUserVote(null);
-        setPollPopupOpen(false);
-        setIsPollResultsHidden(false);
-      }
-    }
-
-    function requestState() {
-      console.log("[PAGE] Requesting current state...");
-      socket.emit("get_state");
-    }
-
-    socket.on("state", onState);
-    socket.on("poll", onPoll);
-    socket.on("connect", requestState);
-
-    // If already connected, request immediately
-    if (socket.connected) {
-      requestState();
-    }
-
-    return () => {
-      socket.off("state", onState);
-      socket.off("poll", onPoll);
-      socket.off("connect", requestState);
-    };
+    return () => unsubs.forEach(u => u());
   }, []);
 
   useEffect(() => {
@@ -93,10 +80,21 @@ export default function LyricsPage() {
     }
   }, [fadeKey]);
 
-  function handleVote(index: number) {
+  async function handleVote(index: number) {
     if (userVote !== null || !pollData?.active) return;
     setUserVote(index);
-    socket.emit("vote", index);
+
+    const pollRef = ref(db, "poll");
+    await runTransaction(pollRef, (currentPoll) => {
+      if (currentPoll && currentPoll.active) {
+        if (!currentPoll.counts) {
+          currentPoll.counts = new Array(currentPoll.options.length).fill(0);
+        }
+        currentPoll.counts[index]++;
+        currentPoll.totalVotes = (currentPoll.totalVotes || 0) + 1;
+      }
+      return currentPoll;
+    });
   }
 
   const { currentSong, queue } = state;
@@ -138,7 +136,7 @@ export default function LyricsPage() {
             {/* Lyrics portion */}
             <div ref={lyricsRef} className="lyrics-container">
               <div className="lyrics-inner">
-                {currentSong.lyrics.split("\n").map((line, i) => (
+                {currentSong.lyrics.split("\n").map((line: string, i: number) => (
                   <p key={i} className={`lyrics-line ${line.trim() === "" ? "lyrics-break" : ""}`}>
                     {line || "\u00A0"}
                   </p>
@@ -165,7 +163,7 @@ export default function LyricsPage() {
               {userVote !== null ? "Vote Cast!" : "New Poll: Pick the next song"}
             </span>
             <div className="poll-options-live">
-              {pollData.options.map((option, i) => (
+              {pollData.options.map((option: string, i: number) => (
                 <div
                   key={i}
                   className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
@@ -218,7 +216,7 @@ export default function LyricsPage() {
           </div>
           {peekOpen && nextSong && (
             <div className="next-song-lyrics">
-              {nextSong.lyrics.split("\n").map((line, i) => (
+              {nextSong.lyrics.split("\n").map((line: string, i: number) => (
                 <p key={i} className={`peek-lyrics-line ${line.trim() === "" ? "lyrics-break" : ""}`}>
                   {line || "\u00A0"}
                 </p>
@@ -250,7 +248,7 @@ export default function LyricsPage() {
                 </button>
               </div>
               <div className="poll-options-live">
-                {pollData.options.map((option, i) => (
+                {pollData.options.map((option: string, i: number) => (
                   <div
                     key={i}
                     className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
