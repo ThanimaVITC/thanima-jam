@@ -35,6 +35,13 @@ export default function LyricsPage() {
   const [peekOpen, setPeekOpen] = useState(false);
   const lyricsRef = useRef<HTMLDivElement>(null);
 
+  const ensureArray = <T,>(val: any): T[] => {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'object') return Object.values(val) as T[];
+    return [];
+  };
+
   useEffect(() => {
     const stateRef = ref(db, "state");
     const pollRef = ref(db, "poll");
@@ -42,28 +49,32 @@ export default function LyricsPage() {
     const unsubs = [
       onValue(stateRef, (snapshot) => {
         const data = snapshot.val();
-        if (data) {
+        if (data && typeof data === 'object') {
           setState((prev) => {
             const songChanged = data.currentSong?.title !== prev.currentSong?.title;
             if (songChanged) {
               setFadeKey((k) => k + 1);
             }
-            return data;
+            return {
+              currentSong: data.currentSong || null,
+              queue: ensureArray<Song>(data.queue)
+            };
           });
         }
       }),
       onValue(pollRef, (snapshot) => {
         const data = snapshot.val();
+        const poll = data && typeof data === 'object' ? data : null;
         setPollData((prev) => {
-          const isNewPoll = data?.active && (!prev || !prev.active);
+          const isNewPoll = poll?.active && (!prev || !prev.active);
           if (isNewPoll) {
             setPollPopupOpen(true);
             setIsPollResultsHidden(false);
           }
-          return data;
+          return poll;
         });
 
-        if (!data) {
+        if (!poll) {
           setUserVote(null);
           setPollPopupOpen(false);
           setIsPollResultsHidden(false);
@@ -99,11 +110,12 @@ export default function LyricsPage() {
     });
   }
 
-  const { currentSong, queue } = state;
+  const { currentSong, queue: rawQueue } = state;
+  const queue = ensureArray<Song>(rawQueue);
   const nextSong = queue.length > 0 ? queue[0] : null;
   const showResults = userVote !== null || (pollData && !pollData.active);
-  const countsArray = pollData && Array.isArray(pollData.counts) ? pollData.counts : [0];
-  const maxVote = Math.max(...countsArray, 1);
+  const countsArray = pollData ? ensureArray<number>(pollData.counts) : [];
+  const maxVote = countsArray.length > 0 ? Math.max(...countsArray, 1) : 1;
 
   return (
     <main className="page">
@@ -166,7 +178,7 @@ export default function LyricsPage() {
               {userVote !== null ? "Vote Cast!" : "New Poll: Pick the next song"}
             </span>
             <div className="poll-options-live">
-              {pollData.options?.map((option: string, i: number) => (
+              {ensureArray<string>(pollData.options).map((option: string, i: number) => (
                 <div
                   key={i}
                   className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
@@ -174,13 +186,13 @@ export default function LyricsPage() {
                 >
                   <div className="poll-option-content">
                     <span className="poll-option-title">{option}</span>
-                    {showResults && <span className="poll-option-percentage">{Math.round(((pollData.counts?.[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
+                    {showResults && <span className="poll-option-percentage">{Math.round(((ensureArray<number>(pollData.counts)[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
                   </div>
                   {showResults && (
                     <div className="poll-bar-track">
                       <div
-                        className={`poll-bar-fill ${!pollData.active && pollData.counts?.[i] === Math.max(...(pollData.counts || [0])) ? "winner" : ""}`}
-                        style={{ width: `${((pollData.counts?.[i] || 0) / maxVote) * 100}%` }}
+                        className={`poll-bar-fill ${!pollData.active && ensureArray<number>(pollData.counts)[i] === Math.max(...ensureArray<number>(pollData.counts)) ? "winner" : ""}`}
+                        style={{ width: `${((ensureArray<number>(pollData.counts)[i] || 0) / maxVote) * 100}%` }}
                       />
                     </div>
                   )}
@@ -251,7 +263,7 @@ export default function LyricsPage() {
                 </button>
               </div>
               <div className="poll-options-live">
-                {pollData.options?.map((option: string, i: number) => (
+                {ensureArray<string>(pollData.options).map((option: string, i: number) => (
                   <div
                     key={i}
                     className={`poll-option ${userVote === i ? "voted" : ""} ${!pollData.active ? "disabled" : ""}`}
@@ -259,13 +271,13 @@ export default function LyricsPage() {
                   >
                     <div className="poll-option-content">
                       <span className="poll-option-title">{option}</span>
-                      {showResults && <span className="poll-option-percentage">{Math.round(((pollData.counts?.[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
+                      {showResults && <span className="poll-option-percentage">{Math.round(((ensureArray<number>(pollData.counts)[i] || 0) / (pollData.totalVotes || 1)) * 100)}%</span>}
                     </div>
                     {showResults && (
                       <div className="poll-bar-track">
                         <div
-                          className={`poll-bar-fill ${!pollData.active && pollData.counts?.[i] === Math.max(...(pollData.counts || [0])) ? "winner" : ""}`}
-                          style={{ width: `${((pollData.counts?.[i] || 0) / maxVote) * 100}%` }}
+                          className={`poll-bar-fill ${!pollData.active && ensureArray<number>(pollData.counts)[i] === Math.max(...ensureArray<number>(pollData.counts)) ? "winner" : ""}`}
+                          style={{ width: `${((ensureArray<number>(pollData.counts)[i] || 0) / maxVote) * 100}%` }}
                         />
                       </div>
                     )}

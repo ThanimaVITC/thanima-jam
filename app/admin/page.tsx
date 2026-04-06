@@ -80,6 +80,13 @@ function AdminPanel() {
     const [pollSelections, setPollSelections] = useState<string[]>([]);
     const [isPollMinimized, setIsPollMinimized] = useState(false);
 
+    const safeArray = useCallback(<T,>(val: any): T[] => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'object') return Object.values(val) as T[];
+        return [];
+    }, []);
+
     useEffect(() => {
         const stateRef = ref(db, "state");
         const pollRef = ref(db, "poll");
@@ -87,14 +94,17 @@ function AdminPanel() {
         const unsubs = [
             onValue(stateRef, (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
+                if (data && typeof data === 'object') {
                     setCurrentSong(data.currentSong || null);
-                    setLocalQueue(data.queue || []);
+                    setLocalQueue(safeArray<Song>(data.queue));
+                } else if (data === null) {
+                    setCurrentSong(null);
+                    setLocalQueue([]);
                 }
             }),
             onValue(pollRef, (snapshot) => {
                 const data = snapshot.val();
-                setPollData(data);
+                setPollData(data && typeof data === 'object' ? data : null);
             })
         ];
 
@@ -108,9 +118,10 @@ function AdminPanel() {
         await set(stateRef, { ...currentState, ...updates });
     }, []);
 
-    const allSongs: Song[] = songsData;
+    const allSongs: Song[] = safeArray<Song>(songsData);
     const availableSongs = allSongs.filter((song) => {
-        const inQueue = localQueue.some((q) => q.title === song.title);
+        const queue = safeArray<Song>(localQueue);
+        const inQueue = queue.some((q) => q.title === song.title);
         const isCurrent = currentSong?.title === song.title;
         return !inQueue && !isCurrent;
     });
@@ -146,13 +157,14 @@ function AdminPanel() {
 
     // Poll helpers
     function togglePollSelection(title: string) {
-        setPollSelections((prev) =>
-            prev.includes(title)
+        setPollSelections((p) => {
+            const prev = safeArray<string>(p);
+            return prev.includes(title)
                 ? prev.filter((t) => t !== title)
                 : prev.length < 4
                     ? [...prev, title]
-                    : prev
-        );
+                    : prev;
+        });
     }
 
     async function handleCreatePoll() {
@@ -193,8 +205,8 @@ function AdminPanel() {
         await set(ref(db, "poll"), null);
     }
 
-    const countsArray = pollData && Array.isArray(pollData.counts) ? pollData.counts : [0];
-    const maxVote = Math.max(...countsArray, 1);
+    const countsArray = pollData ? safeArray<number>(pollData.counts) : [];
+    const maxVote = countsArray.length > 0 ? Math.max(...countsArray, 1) : 1;
 
     return (
         <main className="page">
@@ -229,7 +241,7 @@ function AdminPanel() {
                         className="btn-primary"
                         style={{ width: "100%", marginTop: "1rem" }}
                     >
-                        {localQueue.length > 0 ? "Next Song →" : "Clear & End Session"}
+                        {safeArray(localQueue).length > 0 ? "Next Song →" : "Clear & End Session"}
                     </button>
                 </div>
 
@@ -282,11 +294,11 @@ function AdminPanel() {
                             ) : (
                                 <>
                                     <p className="admin-empty">
-                                        Select 2–4 songs, then create poll ({pollSelections.length}/4 selected)
+                                        Select 2–4 songs, then create poll ({safeArray(pollSelections).length}/4 selected)
                                     </p>
                                     <ul className="queue-list" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                                        {allSongs.map((song: Song) => {
-                                            const selected = pollSelections.includes(song.title);
+                                        {safeArray<Song>(allSongs).map((song: Song) => {
+                                            const selected = safeArray(pollSelections).includes(song.title);
                                             return (
                                                 <li
                                                     key={song.title}
@@ -304,7 +316,7 @@ function AdminPanel() {
                                     </ul>
                                     <button
                                         onClick={handleCreatePoll}
-                                        disabled={pollSelections.length < 2}
+                                        disabled={safeArray(pollSelections).length < 2}
                                         className="btn-primary"
                                         style={{ width: "100%", marginTop: "1rem" }}
                                     >
@@ -318,19 +330,19 @@ function AdminPanel() {
 
                 {/* Queue */}
                 <div className="admin-card">
-                    <span className="admin-card-label">Queue ({localQueue.length})</span>
-                    {localQueue.length === 0 ? (
+                    <span className="admin-card-label">Queue ({safeArray(localQueue).length})</span>
+                    {safeArray(localQueue).length === 0 ? (
                         <p className="admin-empty">No songs in queue</p>
                     ) : (
                         <ul className="queue-list">
-                            {localQueue.map((song: Song, i: number) => (
+                            {safeArray<Song>(localQueue).map((song: Song, i: number) => (
                                 <li key={`${song.title}-${i}`} className="queue-row">
                                     <span className="queue-index">{i + 1}</span>
                                     <div className="queue-thumb">♪</div>
                                     <span className="queue-name">{song.title}</span>
                                     <div className="admin-row-actions">
                                         <button onClick={() => handleMoveUp(i)} disabled={i === 0} className="admin-action-btn" title="Move up">↑</button>
-                                        <button onClick={() => handleMoveDown(i)} disabled={i >= localQueue.length - 1} className="admin-action-btn" title="Move down">↓</button>
+                                        <button onClick={() => handleMoveDown(i)} disabled={i >= safeArray(localQueue).length - 1} className="admin-action-btn" title="Move down">↓</button>
                                         <button onClick={() => handleRemoveFromQueue(i)} className="admin-remove-btn">✕</button>
                                     </div>
                                 </li>
@@ -340,13 +352,13 @@ function AdminPanel() {
                 </div>
 
                 {/* Song Library */}
-                {availableSongs.length > 0 && (
+                {safeArray(availableSongs).length > 0 && (
                     <div className="admin-card">
                         <span className="admin-card-label">
-                            Song Library ({availableSongs.length} available)
+                            Song Library ({safeArray(availableSongs).length} available)
                         </span>
                         <ul className="queue-list">
-                            {availableSongs.map((song: Song) => (
+                            {safeArray<Song>(availableSongs).map((song: Song) => (
                                 <li key={song.title} className="queue-row library-row">
                                     <div className="queue-thumb">♪</div>
                                     <span className="queue-name">{song.title}</span>
