@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 
-// Connect to the custom server on port 3000
-const URL = "http://localhost:3000";
+// Use the current origin for the socket connection (auto-detects port/hostname)
+const URL = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
 
 export const socket: Socket = io(URL, {
     autoConnect: true,

@@ -6,8 +6,8 @@ const fs = require("fs");
 const path = require("path");
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
-const port = 3000;
+const hostname = process.env.HOSTNAME || "0.0.0.0";
+const port = parseInt(process.env.PORT || "3000", 10);
 
 // Initialize Next.js app
 const app = next({ dev, hostname, port });
